@@ -2,7 +2,7 @@ FROM golang:latest
 
 WORKDIR /app
 
-ADD *
+ADD . .
 
 RUN go build main.go 
 
