@@ -2,12 +2,15 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
 var logger logrus.Logger = *logrus.New()
 
 func main() {
+	app_id := uuid.New().String()
+	logger.Println(logrus.Fields{"app_id": app_id})
 
 	app := gin.New()
 
