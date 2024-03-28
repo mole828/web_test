@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: web-api
-        image: ccr.ccs.tencentyun.com/test_space_0/web_test:latest
+        image: ccr.ccs.tencentyun.com/test_space_0/web_test_0:0
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -30,6 +30,9 @@ spec:
     app: web-api
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
+      port: 8080
+      targetPort: 8080
   type: LoadBalancer
+
+# kubectl proxy --address='0.0.0.0' --accept-hosts='^*$' --port=8009
+# http://10.0.0.42:8009/api/v1/namespaces/default/services/web-api-service:8080/proxy/count
