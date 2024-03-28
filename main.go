@@ -20,7 +20,7 @@ func main() {
 	app.GET("/count", func(ctx *gin.Context) {
 		count += 1
 		logger.WithField("count", count).Info("count add")
-		ctx.JSON(200, gin.H{"count": count})
+		ctx.JSON(200, gin.H{"count": count, "app_id": app_id})
 	})
 
 	logger.Info("server running")
