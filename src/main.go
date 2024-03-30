@@ -1,6 +1,8 @@
 package main
 
 import (
+	"web_test/src/cache"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -13,14 +15,18 @@ func main() {
 	logger.Println(logrus.Fields{"app_id": app_id})
 
 	app := gin.New()
-
 	app.Use(gin.Recovery())
 
-	count := 0
+	count := cache.Default()
 	app.GET("/count", func(ctx *gin.Context) {
-		count += 1
-		logger.WithField("count", count).Info("count add")
-		ctx.JSON(200, gin.H{"count": count, "app_id": app_id})
+		mulit_count, err := count.Inc("multi_count")
+		if err != nil {
+			ctx.JSON(400, gin.H{
+				"error": err,
+			})
+		}
+		logger.WithField("count", mulit_count).Info("count add")
+		ctx.JSON(200, gin.H{"count": mulit_count, "app_id": app_id})
 	})
 
 	logger.Info("server running")
