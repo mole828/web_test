@@ -1,0 +1,106 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+data:
+  master.conf: |
+    bind 0.0.0.0
+    port 6379
+    appendonly yes
+    protected-mode no
+  slave.conf: |
+    bind 0.0.0.0
+    port 6379
+    appendonly yes
+    protected-mode no
+    slaveof redis-master-service 6379
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      role: master
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: master
+    spec:
+      containers:
+      - name: master
+        image: redis
+        command: ["redis-server"]
+        args: ["/usr/local/etc/redis/redis.conf"]
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - mountPath: /usr/local/etc/redis/redis.conf
+          name: conf
+          subPath: master.conf
+      volumes:
+      - name: conf
+        configMap:
+          name: redis-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-slave
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: redis
+      role: slave
+  template:
+    metadata:
+      labels:
+        app: redis
+        role: slave
+    spec:
+      containers:
+      - name: slave
+        image: redis
+        command: ["redis-server"]
+        args: ["/usr/local/etc/redis/redis.conf"]
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+        - mountPath: /usr/local/etc/redis/redis.conf
+          name: conf
+          subPath: slave.conf
+      volumes:
+      - name: conf
+        configMap:
+          name: redis-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-master-service
+spec:
+  selector:
+    app: redis
+    role: master
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-slave-service
+spec:
+  selector:
+    app: redis
+    role: slave
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
